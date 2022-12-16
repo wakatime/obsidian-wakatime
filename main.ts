@@ -19,7 +19,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
   mySetting: 'default',
 };
 
-export default class MyPlugin extends Plugin {
+export default class WakaTime extends Plugin {
   settings: MyPluginSettings;
 
   async onload() {
@@ -115,9 +115,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-  plugin: MyPlugin;
+  plugin: WakaTime;
 
-  constructor(app: App, plugin: MyPlugin) {
+  constructor(app: App, plugin: WakaTime) {
     super(app, plugin);
     this.plugin = plugin;
   }
