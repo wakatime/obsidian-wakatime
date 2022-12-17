@@ -23,6 +23,15 @@ export default class WakaTime extends Plugin {
 
   async onload() {
     this.options = new Options(this.logger);
+
+    this.addCommand({
+      id: 'wakatime-api-key',
+      name: 'WakaTime API Key',
+      callback: () => {
+        this.promptForApiKey();
+      },
+    });
+
     this.options.getSetting('settings', 'debug', false, (debug: OptionSetting) => {
       this.logger = new Logger(debug.value == 'true' ? LogLevel.DEBUG : LogLevel.INFO);
       this.dependencies = new Dependencies(this.options, this.logger);
@@ -89,29 +98,19 @@ export default class WakaTime extends Plugin {
   }
 
   private onEvent(isWrite: boolean) {
-      const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-      if (!view) return;
-      const activeFile = this.app.workspace.getActiveFile();
-      if (!activeFile) return;
-      const cursor = view.editor.getCursor();
-      // @ts-expect-error
-      const file = `${this.app.vault.adapter.basePath}/${activeFile.path}`;
-      const time: number = Date.now();
-      if (
-        isWrite ||
-        this.enoughTimePassed(time) ||
-        this.lastFile !== file
-      ) {
-        this.sendHeartbeat(
-          file,
-          time,
-          cursor.line,
-          cursor.ch,
-          isWrite,
-        );
-        this.lastFile = file;
-        this.lastHeartbeat = time;
-      }
+    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!view) return;
+    const activeFile = this.app.workspace.getActiveFile();
+    if (!activeFile) return;
+    const cursor = view.editor.getCursor();
+    // @ts-expect-error
+    const file = `${this.app.vault.adapter.basePath}/${activeFile.path}`;
+    const time: number = Date.now();
+    if (isWrite || this.enoughTimePassed(time) || this.lastFile !== file) {
+      this.sendHeartbeat(file, time, cursor.line, cursor.ch, isWrite);
+      this.lastFile = file;
+      this.lastHeartbeat = time;
+    }
   }
 
   private enoughTimePassed(time: number): boolean {
@@ -145,13 +144,7 @@ export default class WakaTime extends Plugin {
   ): void {
     this.options.getApiKey((apiKey) => {
       if (apiKey) {
-        this._sendHeartbeat(
-          file,
-          time,
-          lineno,
-          cursorpos,
-          isWrite,
-        );
+        this._sendHeartbeat(file, time, lineno, cursorpos, isWrite);
       } else {
         this.promptForApiKey();
       }
@@ -335,7 +328,7 @@ class ApiKeyModal extends Modal {
 
       new Setting(contentEl).addText((text) => {
         text.setValue(defaultVal);
-        text.inputEl.addClass("api-key-input");
+        text.inputEl.addClass('api-key-input');
         this.input = text;
       });
 
