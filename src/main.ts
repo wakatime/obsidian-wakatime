@@ -95,6 +95,9 @@ export default class WakaTime extends Plugin {
     this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
       this.onEvent(false);
     });
+    this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
+      this.onEvent(false);
+    });
   }
 
   private onEvent(isWrite: boolean) {
