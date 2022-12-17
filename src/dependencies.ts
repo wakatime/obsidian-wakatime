@@ -1,4 +1,4 @@
-import * as adm_zip from 'adm-zip';
+import AdmZip from 'adm-zip';
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -6,14 +6,13 @@ import * as path from 'path';
 import * as request from 'request';
 import * as which from 'which';
 
-import { Options, Setting } from './options';
+import { Options, OptionSetting } from './options';
 import { Desktop } from './desktop';
 import { Logger } from './logger';
 
 export class Dependencies {
   private options: Options;
   private logger: Logger;
-  private extensionPath: string;
   private resourcesLocation?: string = undefined;
   private cliLocation?: string = undefined;
   private cliLocationGlobal?: string = undefined;
@@ -25,10 +24,9 @@ export class Dependencies {
     'https://api.github.com/repos/wakatime/wakatime-cli/releases?per_page=1';
   private latestCliVersion = '';
 
-  constructor(options: Options, logger: Logger, extensionPath: string) {
+  constructor(options: Options, logger: Logger) {
     this.options = options;
     this.logger = logger;
-    this.extensionPath = extensionPath;
   }
 
   private getResourcesLocation() {
@@ -39,7 +37,7 @@ export class Dependencies {
       fs.mkdirSync(folder, { recursive: true });
       this.resourcesLocation = folder;
     } catch (e) {
-      this.resourcesLocation = this.extensionPath;
+      this.resourcesLocation = "./.wakatime";
     }
     return this.resourcesLocation;
   }
@@ -136,15 +134,15 @@ export class Dependencies {
       callback(this.latestCliVersion);
       return;
     }
-    this.options.getSetting('settings', 'proxy', false, (proxy: Setting) => {
-      this.options.getSetting('settings', 'no_ssl_verify', false, (noSSLVerify: Setting) => {
+    this.options.getSetting('settings', 'proxy', false, (proxy: OptionSetting) => {
+      this.options.getSetting('settings', 'no_ssl_verify', false, (noSSLVerify: OptionSetting) => {
         this.options.getSetting(
           'internal',
           'cli_version_last_modified',
           true,
-          (modified: Setting) => {
-            this.options.getSetting('internal', 'cli_version', true, (version: Setting) => {
-              this.options.getSetting('settings', 'alpha', false, (alpha: Setting) => {
+          (modified: OptionSetting) => {
+            this.options.getSetting('internal', 'cli_version', true, (version: OptionSetting) => {
+              this.options.getSetting('settings', 'alpha', false, (alpha: OptionSetting) => {
                 const options: request.OptionsWithUrl = {
                   url:
                     alpha.value == 'true'
@@ -295,8 +293,8 @@ export class Dependencies {
     callback: () => void,
     error: () => void,
   ): void {
-    this.options.getSetting('settings', 'proxy', false, (proxy: Setting) => {
-      this.options.getSetting('settings', 'no_ssl_verify', false, (noSSLVerify: Setting) => {
+    this.options.getSetting('settings', 'proxy', false, (proxy: OptionSetting) => {
+      this.options.getSetting('settings', 'no_ssl_verify', false, (noSSLVerify: OptionSetting) => {
 				const options: request.OptionsWithUrl = { url: url };
         if (proxy.value) {
           this.logger.debug(`Using Proxy: ${proxy.value}`);
@@ -328,7 +326,7 @@ export class Dependencies {
   private unzip(file: string, outputDir: string, callback: () => void): void {
     if (fs.existsSync(file)) {
       try {
-        const zip = new adm_zip(file);
+        const zip = new AdmZip(file);
         zip.extractAllTo(outputDir, true);
       } catch (e) {
         this.logger.errorException(e);
@@ -385,8 +383,8 @@ export class Dependencies {
 
   private reportMissingPlatformSupport(osname: string, architecture: string): void {
     const url = `https://api.wakatime.com/api/v1/cli-missing?osname=${osname}&architecture=${architecture}&plugin=vscode`;
-    this.options.getSetting('settings', 'proxy', false, (proxy: Setting) => {
-      this.options.getSetting('settings', 'no_ssl_verify', false, (noSSLVerify: Setting) => {
+    this.options.getSetting('settings', 'proxy', false, (proxy: OptionSetting) => {
+      this.options.getSetting('settings', 'no_ssl_verify', false, (noSSLVerify: OptionSetting) => {
 				const options: request.OptionsWithUrl = { url: url };
         if (proxy.value) options['proxy'] = proxy.value;
         if (noSSLVerify.value === 'true') options['strictSSL'] = false;

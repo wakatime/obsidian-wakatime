@@ -6,15 +6,15 @@ import { Utils } from './utils';
 import { Logger } from './logger';
 import { Desktop } from './desktop';
 
-export interface Setting {
+export interface OptionSetting {
   key: string;
   value: string;
   error?: Error;
 }
 
 type FoundOption = {
-	[key: string]: boolean
-}
+  [key: string]: boolean;
+};
 
 export class Options {
   private configFile: string;
@@ -43,7 +43,7 @@ export class Options {
     section: string,
     key: string,
     internal: boolean,
-    callback: (_:Setting) => void,
+    callback: (_: OptionSetting) => void,
   ): void {
     fs.readFile(
       this.getConfigFile(internal),
@@ -74,8 +74,7 @@ export class Options {
               }
             }
           }
-
-          callback({ key: key, value: ''});
+          callback({ key: key, value: '' });
         }
       },
     );
@@ -133,7 +132,7 @@ export class Options {
     });
   }
 
-  public setSettings(section: string, settings: Setting[], internal: boolean): void {
+  public setSettings(section: string, settings: OptionSetting[], internal: boolean): void {
     const configFile = this.getConfigFile(internal);
     fs.readFile(configFile, 'utf-8', (err: NodeJS.ErrnoException | null, content: string) => {
       // ignore errors because config file might not exist yet
@@ -142,7 +141,7 @@ export class Options {
       const contents: string[] = [];
       let currentSection = '';
 
-      const found:FoundOption = {};
+      const found: FoundOption = {};
       const lines = content.split('\n');
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -217,7 +216,7 @@ export class Options {
         this.cache.api_key = apiKeyFromVault;
         return this.cache.api_key;
       }
-    // eslint-disable-next-line no-empty
+      // eslint-disable-next-line no-empty
     } catch (err) {}
 
     try {
@@ -235,8 +234,7 @@ export class Options {
       const apiKeyCmd = await this.getSettingAsync('settings', 'api_key_vault_cmd');
       if (!apiKeyCmd) return '';
 
-      
-			const options = Desktop.buildOptions();
+      const options = Desktop.buildOptions();
       const proc = child_process.spawn(apiKeyCmd, options);
 
       let stdout = '';

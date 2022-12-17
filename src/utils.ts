@@ -1,4 +1,3 @@
-
 export class Utils {
   public static quote(str: string): string {
     if (str.includes(' ')) return `"${str.replace('"', '\\"')}"`;
@@ -29,8 +28,8 @@ export class Utils {
     return '';
   }
 
-  public static formatDate(date: Date): String {
-    let months = [
+  public static formatDate(date: Date): string {
+    const months = [
       'Jan',
       'Feb',
       'Mar',
@@ -53,7 +52,7 @@ export class Utils {
     if (hour == 0) {
       hour = 12;
     }
-    let minute = date.getMinutes();
+    const minute = date.getMinutes();
     return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} ${hour}:${
       minute < 10 ? `0${minute}` : minute
     } ${ampm}`;
@@ -75,9 +74,9 @@ export class Utils {
   }
 
   public static formatArguments(binary: string, args: string[]): string {
-    let clone = args.slice(0);
+    const clone = args.slice(0);
     clone.unshift(this.wrapArg(binary));
-    let newCmds: string[] = [];
+    const newCmds: string[] = [];
     let lastCmd = '';
     for (let i = 0; i < clone.length; i++) {
       if (lastCmd == '--key') newCmds.push(this.wrapArg(this.obfuscateKey(clone[i])));

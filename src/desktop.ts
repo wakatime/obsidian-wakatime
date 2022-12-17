@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 interface Option {
-	windowsHide: boolean;
-	env?: any;
+  windowsHide: boolean;
+  env?: any;
 }
 
 export class Desktop {
@@ -16,14 +16,14 @@ export class Desktop {
   }
 
   public static getHomeDirectory(): string {
-    let home = process.env.WAKATIME_HOME;
+    const home = process.env.WAKATIME_HOME;
     if (home && home.trim() && fs.existsSync(home.trim())) return home.trim();
     if (this.isPortable()) return process.env['VSCODE_PORTABLE'] as string;
     return process.env[this.isWindows() ? 'USERPROFILE' : 'HOME'] || process.cwd();
   }
 
-  public static buildOptions(): Object {
-    const options:Option = {
+  public static buildOptions(): any {
+    const options: Option = {
       windowsHide: true,
     };
     if (!this.isWindows() && !process.env.WAKATIME_HOME && !process.env.HOME) {
