@@ -24,7 +24,7 @@ export class Options {
   private cache: any = {};
 
   constructor(logger: Logger) {
-    let wakaHome = Desktop.getHomeDirectory();
+    const wakaHome = Desktop.getHomeDirectory();
     this.configFile = path.join(wakaHome, '.wakatime.cfg');
     this.internalConfigFile = path.join(wakaHome, '.wakatime-internal.cfg');
     this.logFile = path.join(wakaHome, '.wakatime.log');
@@ -57,17 +57,17 @@ export class Options {
           });
         } else {
           let currentSection = '';
-          let lines = content.split('\n');
-          for (var i = 0; i < lines.length; i++) {
-            let line = lines[i];
+          const lines = content.split('\n');
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
             if (this.startsWith(line.trim(), '[') && this.endsWith(line.trim(), ']')) {
               currentSection = line
                 .trim()
                 .substring(1, line.trim().length - 1)
                 .toLowerCase();
             } else if (currentSection === section) {
-              let parts = line.split('=');
-              let currentKey = parts[0].trim();
+              const parts = line.split('=');
+              const currentKey = parts[0].trim();
               if (currentKey === key && parts.length > 1) {
                 callback({ key: key, value: this.removeNulls(parts[1].trim()) });
                 return;
@@ -87,13 +87,13 @@ export class Options {
       // ignore errors because config file might not exist yet
       if (err) content = '';
 
-      let contents: string[] = [];
+      const contents: string[] = [];
       let currentSection = '';
 
       let found = false;
-      let lines = content.split('\n');
-      for (var i = 0; i < lines.length; i++) {
-        let line = lines[i];
+      const lines = content.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         if (this.startsWith(line.trim(), '[') && this.endsWith(line.trim(), ']')) {
           if (currentSection === section && !found) {
             contents.push(this.removeNulls(key + ' = ' + val));
@@ -105,8 +105,8 @@ export class Options {
             .toLowerCase();
           contents.push(this.removeNulls(line));
         } else if (currentSection === section) {
-          let parts = line.split('=');
-          let currentKey = parts[0].trim();
+          const parts = line.split('=');
+          const currentKey = parts[0].trim();
           if (currentKey === key) {
             if (!found) {
               contents.push(this.removeNulls(key + ' = ' + val));
@@ -139,13 +139,13 @@ export class Options {
       // ignore errors because config file might not exist yet
       if (err) content = '';
 
-      let contents: string[] = [];
+      const contents: string[] = [];
       let currentSection = '';
 
       const found:FoundOption = {};
-      let lines = content.split('\n');
-      for (var i = 0; i < lines.length; i++) {
-        let line = lines[i];
+      const lines = content.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         if (this.startsWith(line.trim(), '[') && this.endsWith(line.trim(), ']')) {
           if (currentSection === section) {
             settings.forEach((setting) => {
@@ -161,8 +161,8 @@ export class Options {
             .toLowerCase();
           contents.push(this.removeNulls(line));
         } else if (currentSection === section) {
-          let parts = line.split('=');
-          let currentKey = parts[0].trim();
+          const parts = line.split('=');
+          const currentKey = parts[0].trim();
           let keepLineUnchanged = true;
           settings.forEach((setting) => {
             if (currentKey === setting.key) {
@@ -217,6 +217,7 @@ export class Options {
         this.cache.api_key = apiKeyFromVault;
         return this.cache.api_key;
       }
+    // eslint-disable-next-line no-empty
     } catch (err) {}
 
     try {
