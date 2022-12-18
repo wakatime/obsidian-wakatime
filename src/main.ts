@@ -175,7 +175,7 @@ export default class WakaTime extends Plugin {
 
     if (isWrite) args.push('--write');
 
-    if (Desktop.isWindows() || Desktop.isPortable()) {
+    if (Desktop.isWindows()) {
       args.push(
         '--config',
         Utils.quote(this.options.getConfigFile(false)),
