@@ -22,6 +22,7 @@ export default class WakaTime extends Plugin {
   lastHeartbeat = 0;
 
   async onload() {
+    this.logger = new Logger(LogLevel.INFO);
     this.options = new Options(this.logger);
 
     this.addCommand({
@@ -33,7 +34,7 @@ export default class WakaTime extends Plugin {
     });
 
     this.options.getSetting('settings', 'debug', false, (debug: OptionSetting) => {
-      this.logger = new Logger(debug.value == 'true' ? LogLevel.DEBUG : LogLevel.INFO);
+      this.logger.setLevel(debug.value == 'true' ? LogLevel.DEBUG : LogLevel.INFO);
       this.dependencies = new Dependencies(this.options, this.logger);
 
       this.options.getSetting('settings', 'disabled', false, (disabled: OptionSetting) => {
@@ -146,11 +147,8 @@ export default class WakaTime extends Plugin {
     isWrite: boolean,
   ): void {
     this.options.getApiKey((apiKey) => {
-      if (apiKey) {
-        this._sendHeartbeat(file, time, lineno, cursorpos, isWrite);
-      } else {
-        this.promptForApiKey();
-      }
+      if (!apiKey) return;
+      this._sendHeartbeat(file, time, lineno, cursorpos, isWrite);
     });
   }
 
@@ -314,10 +312,15 @@ export default class WakaTime extends Plugin {
 class ApiKeyModal extends Modal {
   options: Options;
   input: TextComponent;
+  private static instance: ApiKeyModal;
 
   constructor(app: App, options: Options) {
+    if (ApiKeyModal.instance) {
+      return ApiKeyModal.instance;
+    }
     super(app);
     this.options = options;
+    ApiKeyModal.instance = this;
   }
 
   onOpen() {
