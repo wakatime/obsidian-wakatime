@@ -22,6 +22,8 @@ Visit [https://wakatime.com](https://wakatime.com) to see your coding activity.
 
 ![Project Overview](https://wakatime.com/static/img/ScreenShots/Screen-Shot-2016-03-21.png)
 
+To edit your api key, open the `Command Palette` then type `WakaTime` and select the `WakaTime API Key` command.
+
 ## Troubleshooting
 
 The [How to Debug Plugins][how to debug] guide shows how to check when coding activity was last received from your editor using the [Plugins Status Page][plugins status page].
