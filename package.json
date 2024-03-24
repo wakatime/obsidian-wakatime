@@ -8,7 +8,10 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
-  "keywords": ["time tracker", "time tracking"],
+  "keywords": [
+    "time tracker",
+    "time tracking"
+  ],
   "author": "",
   "license": "BSD",
   "devDependencies": {
@@ -20,7 +23,7 @@
     "@typescript-eslint/parser": "5.29.0",
     "adm-zip": "0.5.9",
     "builtin-modules": "3.3.0",
-    "esbuild": "0.14.47",
+    "esbuild": "0.17.3",
     "request": "2.88.2",
     "prettier": "2.6.0",
     "obsidian": "latest",
