@@ -1,4 +1,4 @@
-import { apiVersion, App, MarkdownView, Modal, Plugin, Setting, TextComponent } from 'obsidian';
+import { apiVersion, App, EditorPosition, FileView, MarkdownView, Modal, Plugin, Setting, TextComponent } from 'obsidian';
 import * as child_process from 'child_process';
 
 import { Options, OptionSetting } from './options';
@@ -102,16 +102,22 @@ export default class WakaTime extends Plugin {
   }
 
   private onEvent(isWrite: boolean) {
-    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    const view = this.app.workspace.getActiveViewOfType(FileView);
     if (!view) return;
+
     const activeFile = this.app.workspace.getActiveFile();
     if (!activeFile) return;
-    const cursor = view.editor.getCursor();
+
     // @ts-expect-error
     const file = `${this.app.vault.adapter.basePath}/${activeFile.path}`;
     const time: number = Date.now();
+
+    let cursor: EditorPosition|null = null
+    if (view instanceof MarkdownView) {
+      cursor = view.editor.getCursor();
+    }
     if (isWrite || this.enoughTimePassed(time) || this.lastFile !== file) {
-      this.sendHeartbeat(file, time, cursor.line, cursor.ch, isWrite);
+      this.sendHeartbeat(file, time, cursor?.line, cursor?.ch, isWrite);
       this.lastFile = file;
       this.lastHeartbeat = time;
     }
@@ -142,8 +148,8 @@ export default class WakaTime extends Plugin {
   private sendHeartbeat(
     file: string,
     time: number,
-    lineno: number,
-    cursorpos: number,
+    lineno: number | undefined,
+    cursorpos: number | undefined,
     isWrite: boolean,
   ): void {
     this.options.getApiKey((apiKey) => {
@@ -155,8 +161,8 @@ export default class WakaTime extends Plugin {
   private _sendHeartbeat(
     file: string,
     time: number,
-    lineno: number,
-    cursorpos: number,
+    lineno: number | undefined,
+    cursorpos: number | undefined,
     isWrite: boolean,
   ): void {
     if (!this.dependencies.isCliInstalled()) return;
@@ -164,12 +170,18 @@ export default class WakaTime extends Plugin {
     const args: string[] = [];
 
     args.push('--entity', Utils.quote(file));
+    args.push('--project', String(this.app.vault.getName()))
 
     const user_agent = 'obsidian/' + apiVersion + ' obsidian-wakatime/' + this.manifest.version;
     args.push('--plugin', Utils.quote(user_agent));
 
-    args.push('--lineno', String(lineno + 1));
-    args.push('--cursorpos', String(cursorpos + 1));
+    if (lineno !== undefined)
+      args.push('--lineno', String(lineno + 1));
+    if (cursorpos !== undefined)
+      args.push('--cursorpos', String(cursorpos + 1));
+
+    if (file.endsWith(".pdf"))
+      args.push('--language', Utils.quote("Pdf"));
 
     if (isWrite) args.push('--write');
 
