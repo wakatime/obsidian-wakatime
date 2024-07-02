@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-wakatime",
-	"name": "WakaTime",
-	"version": "1.1.0",
-	"minAppVersion": "0.15.0",
-	"description": "Automatic time tracking and metrics generated from your Obsidian usage activity.",
-	"author": "WakaTime",
-	"authorUrl": "https://wakatime.com",
-	"fundingUrl": "https://wakatime.com/pricing",
-	"isDesktopOnly": true
+  "id": "obsidian-wakatime",
+  "name": "WakaTime",
+  "version": "1.1.0",
+  "minAppVersion": "0.15.0",
+  "description": "Automatic time tracking and metrics generated from your Obsidian usage activity.",
+  "author": "WakaTime",
+  "authorUrl": "https://wakatime.com",
+  "fundingUrl": "https://wakatime.com/pricing",
+  "isDesktopOnly": true
 }
