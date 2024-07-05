@@ -7,6 +7,11 @@ import { LogLevel } from './constants';
 import { Utils } from './utils';
 import { Dependencies } from './dependencies';
 import { Desktop } from './desktop';
+import { SettingsTab } from './settingsTab';
+
+interface WakaTimeSettings {
+  showStatusBar: boolean;
+}
 
 export default class WakaTime extends Plugin {
   options: Options;
@@ -16,9 +21,11 @@ export default class WakaTime extends Plugin {
   logger: Logger;
   dependencies: Dependencies;
   disabled: boolean;
-  lastFetchToday = 0;
   fetchTodayInterval = 60000;
   lastFile: string;
+  settings: WakaTimeSettings;
+
+  lastFetchToday = 0;
   lastHeartbeat = 0;
 
   async onload() {
@@ -32,11 +39,15 @@ export default class WakaTime extends Plugin {
         this.promptForApiKey();
       },
     });
+    
+    await this.loadSettings();
+    
+    this.showStatusBar = this.settings.showStatusBar;
 
     this.options.getSetting('settings', 'debug', false, (debug: OptionSetting) => {
       this.logger.setLevel(debug.value == 'true' ? LogLevel.DEBUG : LogLevel.INFO);
       this.dependencies = new Dependencies(this.options, this.logger);
-
+      
       this.options.getSetting('settings', 'disabled', false, (disabled: OptionSetting) => {
         this.disabled = disabled.value === 'true';
         if (this.disabled) {
@@ -46,6 +57,8 @@ export default class WakaTime extends Plugin {
         this.initializeDependencies();
       });
     });
+
+    this.addSettingTab(new SettingsTab(this.app, this));
   }
 
   onunload() {}
@@ -54,36 +67,36 @@ export default class WakaTime extends Plugin {
     this.logger.debug(`Initializing WakaTime v${this.manifest.version}`);
 
     this.statusBar = this.addStatusBarItem();
+    
+    this.showStatusBar = this.settings.showStatusBar;
+
+    this.updateStatusBarText('WakaTime Initializing...');
+    this.checkApiKey();
+    this.setupEventListeners();
 
     this.options.getSetting(
       'settings',
-      'status_bar_enabled',
+      'status_bar_coding_activity',
       false,
-      (statusBarEnabled: OptionSetting) => {
-        this.showStatusBar = statusBarEnabled.value !== 'false';
-        this.updateStatusBarText('WakaTime Initializing...');
+      (showCodingActivity: OptionSetting) => {
+        this.showCodingActivity = showCodingActivity.value !== 'false';
 
-        this.checkApiKey();
-
-        this.setupEventListeners();
-
-        this.options.getSetting(
-          'settings',
-          'status_bar_coding_activity',
-          false,
-          (showCodingActivity: OptionSetting) => {
-            this.showCodingActivity = showCodingActivity.value !== 'false';
-
-            this.dependencies.checkAndInstallCli(() => {
-              this.logger.debug('WakaTime initialized');
-              this.updateStatusBarText();
-              this.updateStatusBarTooltip('WakaTime: Initialized');
-              this.getCodingActivity();
-            });
-          },
-        );
+        this.dependencies.checkAndInstallCli(() => {
+          this.logger.debug('WakaTime initialized');
+          this.updateStatusBarText();
+          this.updateStatusBarTooltip('WakaTime: Initialized');
+          this.getCodingActivity();
+        });
       },
     );
+  }
+  
+  async loadSettings() {
+    this.settings = Object.assign({}, { showStatusBar: true }, await this.loadData());
+  }
+  
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
 
   private checkApiKey(): void {
@@ -124,7 +137,7 @@ export default class WakaTime extends Plugin {
   private updateStatusBarText(text?: string): void {
     if (!this.statusBar) return;
     if (!text) {
-      this.statusBar.setText('🕒');
+      this.statusBar.setText('');
     } else {
       this.statusBar.setText('🕒 ' + text);
     }
