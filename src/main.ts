@@ -134,7 +134,7 @@ export default class WakaTime extends Plugin {
     return this.lastHeartbeat + 120000 < time;
   }
 
-  private updateStatusBarText(text?: string): void {
+  public updateStatusBarText(text?: string): void {
     if (!this.statusBar) return;
     if (!text) {
       this.statusBar.setText('');

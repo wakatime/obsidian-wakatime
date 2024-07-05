@@ -22,6 +22,8 @@ export class SettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.showStatusBar)
           .onChange(async (value) => {
             this.plugin.settings.showStatusBar = value;
+            this.plugin.updateStatusBarText();
+            this.plugin.showStatusBar = value;
             await this.plugin.saveSettings();
           })
       );
