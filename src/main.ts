@@ -1,4 +1,4 @@
-import { apiVersion, App, EditorPosition, FileView, MarkdownView, Modal, Plugin, Setting, TextComponent } from 'obsidian';
+import { apiVersion, App, EditorPosition, FileSystemAdapter, FileView, MarkdownView, Modal, Plugin, Setting, TextComponent } from 'obsidian';
 import * as child_process from 'child_process';
 
 import { Options, OptionSetting } from './options';
@@ -93,38 +93,42 @@ export default class WakaTime extends Plugin {
   }
 
   private setupEventListeners(): void {
-    this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-      this.onEvent(false);
+    this.registerDomEvent(document, 'click', () => {
+      this.onEvent();
     });
-    this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
-      this.onEvent(false);
+    this.registerDomEvent(document, 'keydown', () => {
+      this.onEvent();
+    });
+    this.registerDomEvent(document, 'wheel', () => {
+      this.onEvent();
     });
   }
 
-  private onEvent(isWrite: boolean) {
+  private onEvent() {
     const view = this.app.workspace.getActiveViewOfType(FileView);
     if (!view) return;
 
     const activeFile = this.app.workspace.getActiveFile();
     if (!activeFile) return;
 
-    // @ts-expect-error
-    const file = `${this.app.vault.adapter.basePath}/${activeFile.path}`;
+    const file = `${(this.app.vault.adapter as FileSystemAdapter).getBasePath()}/${activeFile.path}`;
     const time: number = Date.now();
+    
+    if (this.enoughTimePassed(time) || this.lastFile !== file) {
+      let cursor: EditorPosition|null = null
+      if (view instanceof MarkdownView) {
+        cursor = view.editor.getCursor();
+      }
 
-    let cursor: EditorPosition|null = null
-    if (view instanceof MarkdownView) {
-      cursor = view.editor.getCursor();
-    }
-    if (isWrite || this.enoughTimePassed(time) || this.lastFile !== file) {
-      this.sendHeartbeat(file, time, cursor?.line, cursor?.ch, isWrite);
+      this.sendHeartbeat(file, time, cursor?.line, cursor?.ch, false);
       this.lastFile = file;
       this.lastHeartbeat = time;
     }
   }
 
   private enoughTimePassed(time: number): boolean {
-    return this.lastHeartbeat + 120000 < time;
+    // send every 60s max
+    return this.lastHeartbeat + 60 * 1000 < time;
   }
 
   private updateStatusBarText(text?: string): void {
